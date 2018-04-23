@@ -1,0 +1,11 @@
+[Unit]
+Description=sample-app
+After=syslog.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/java -jar /opt/gs-spring-boot-0.1.0.jar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
