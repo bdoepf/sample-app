@@ -1,0 +1,38 @@
+{
+  "builders": [
+    {
+      "type": "azure-arm",
+      "client_id": "{{user `packer_client_id`}}",
+      "client_secret": "{{user `packer_client_secret`}}",
+      "subscription_id": "{{ user `packer_subscription_id`}}",
+      "tenant_id": "{{user `packer_tenant_id`}}",
+      "managed_image_name": "bdoepfne-ubuntu-16-04-{{user `image_postfix`}}",
+      "managed_image_resource_group_name": "jambitiac",
+      "os_type": "Linux",
+      "image_publisher": "Canonical",
+      "image_offer": "UbuntuServer",
+      "image_sku": "16.04-daily-LTS",
+      "azure_tags": {
+        "description": "awsome-image"
+      },
+      "location": "{{user `packer_location`}}",
+      "vm_size": "Standard_A0"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo 'hello jambit'"]
+    }
+  ],
+  "variables": {
+    "packer_client_id": "{{env `PACKER_CLIENT_ID`}}",
+    "packer_client_secret": "{{env `PACKER_CLIENT_SECRET`}}",
+    "packer_subscription_id": "{{env `PACKER_SUBSCRIPTION_ID`}}",
+    "packer_location": "{{env `PACKER_LOCATION`}}",
+    "packer_tenant_id": "{{env `PACKER_TENANT_ID`}}",
+    "packer_object_id": "{{env `PACKER_OBJECT_ID`}}",
+    "image_postfix": "{{timestamp}}"
+  }
+}
+
