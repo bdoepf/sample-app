@@ -5,14 +5,29 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('compile') {
             steps {
                 withMaven(maven: '3.5.2', jdk: '1.8') {
-                    sh "mvn clean package"
+                    sh "mvn clean compile"
                 }
             }
         }
-        stage('Packer') {
+
+        stage('test') {
+            steps {
+                withMaven(maven: '3.5.2', jdk: '1.8') {
+                    sh "mvn test"
+                }
+            }
+        }
+        stage('package') {
+            steps {
+                withMaven(maven: '3.5.2', jdk: '1.8') {
+                    sh "mvn package"
+                }
+            }
+        }
+        stage('bake azure image') {
             environment {
                 PACKER_HOME = tool name: 'packer-1.1.3', type: 'biz.neustar.jenkins.plugins.packer.PackerInstallation'
                 PACKER_SUBSCRIPTION_ID = "fcc1ad01-b8a5-471c-812d-4a42ff3d6074"
