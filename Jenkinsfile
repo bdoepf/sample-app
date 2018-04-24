@@ -27,7 +27,17 @@ pipeline {
                 }
             }
         }
-        stage('bake azure image') {
+        stage('packer validate') {
+            environment {
+                PACKER_HOME = tool name: 'packer-1.1.3', type: 'biz.neustar.jenkins.plugins.packer.PackerInstallation'
+            }
+            steps {
+                ansiColor('xterm') {
+                    sh '${PACKER_HOME}/packer validate packer/sample-app-server.json'
+                }
+            }
+        }
+        stage('bake azure image (packer build)') {
             environment {
                 PACKER_HOME = tool name: 'packer-1.1.3', type: 'biz.neustar.jenkins.plugins.packer.PackerInstallation'
                 PACKER_SUBSCRIPTION_ID = "fcc1ad01-b8a5-471c-812d-4a42ff3d6074"
