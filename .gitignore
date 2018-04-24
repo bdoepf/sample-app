@@ -1,3 +1,5 @@
 target
 .idea
 *.iml
+terraform/.terraform
+terraform/plan.out
