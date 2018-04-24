@@ -16,7 +16,7 @@
         "description": "awsome-image"
       },
       "location": "{{user `packer_location`}}",
-      "vm_size": "Standard_A0"
+      "vm_size": "Standard_B1s"
     }
   ],
   "provisioners": [
