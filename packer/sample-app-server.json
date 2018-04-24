@@ -6,7 +6,7 @@
       "client_secret": "{{user `packer_client_secret`}}",
       "subscription_id": "{{ user `packer_subscription_id`}}",
       "tenant_id": "{{user `packer_tenant_id`}}",
-      "managed_image_name": "bdoepfne-ubuntu-16-04-{{user `image_postfix`}}",
+      "managed_image_name": "sample-app-server-bdoepfne-{{user `image_postfix`}}",
       "managed_image_resource_group_name": "jambitiac",
       "os_type": "Linux",
       "image_publisher": "Canonical",
@@ -22,20 +22,20 @@
   "provisioners": [
     {
       "type": "file",
-      "source": "../target/gs-spring-boot-0.1.0.jar",
+      "source": "target/gs-spring-boot-0.1.0.jar",
       "destination": "/tmp/gs-spring-boot-0.1.0.jar"
     },
     {
       "type": "file",
-      "source": "provisioning/services/",
+      "source": "packer/provisioning/services/",
       "destination": "/tmp"
     },
     {
       "type": "shell",
       "execute_command": "chmod +x {{ .Path }}; {{.Vars}} sudo -E sh '{{.Path}}'",
       "scripts": [
-        "provisioning/scripts/install-apt-packages.sh",
-        "provisioning/scripts/enable-services.sh"
+        "packer/provisioning/scripts/install-apt-packages.sh",
+        "packer/provisioning/scripts/enable-services.sh"
       ],
       "inline_shebang": "/bin/sh -x"
     },
