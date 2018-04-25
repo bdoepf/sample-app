@@ -43,27 +43,61 @@ pipeline {
             steps {
                 ansiColor('xterm') {
                     sh '${PACKER_HOME}/packer validate packer/sample-app-server.json'
-                    sh '${PACKER_HOME}/packer build packer/sample-app-server.json'
+                    // sh '${PACKER_HOME}/packer build packer/sample-app-server.json'
                 }
             }
         }
-        stage('terraform apply') {
+        stage('terraform plan') {
             environment {
-                TERRAFORM_HOME = tool name: 'terraform-0.11.3', type: 'org.jenkinsci.plugins.terraform.TerraformInstallation'
+                TERRAFORM_HOME = tool name: 'terraform-0.11.3'
                 ARM_SUBSCRIPTION_ID = "${AZURE_SUBSCRIPTION_ID}"
                 ARM_TENANT_ID = "${AZURE_TENANT_ID}"
                 ARM_CLIENT_ID = "${AZURE_CREDENTIALS_USR}"
                 ARM_CLIENT_SECRET = "${AZURE_CREDENTIALS_PSW}"
-                ARM_ENVIRONMENT="public"
-                TF_VAR_machine_count="2"
+                ARM_ENVIRONMENT = "public"
+                TF_VAR_machine_count = "2"
             }
             steps {
                 ansiColor('xterm') {
-                    sh 'cd terraform && ${TERRAFORM_HOME}/terraform init'
-                    sh 'cd terraform && ${TERRAFORM_HOME}/terraform plan -out plan.out'
-                    sh 'cd terraform && ${TERRAFORM_HOME}/terraform apply -auto-approve plan.out'
+                    dir('terraform') {
+                        sh '${TERRAFORM_HOME}/terraform init'
+                        sh '${TERRAFORM_HOME}/terraform plan -out plan.out'
+                        script {
+                            env.CONTINUE = input message: 'User input required',
+                                    parameters: [choice(name: 'Continue with terraform apply', choices: 'no\nyes', description: 'Choose "yes" if you want to deploy this build')]
+                        }
+
+
+                    }
                 }
             }
+        }
+        stage('Terraform apply') {
+            environment {
+                TERRAFORM_HOME = tool name: 'terraform-0.11.3'
+                ARM_SUBSCRIPTION_ID = "${AZURE_SUBSCRIPTION_ID}"
+                ARM_TENANT_ID = "${AZURE_TENANT_ID}"
+                ARM_CLIENT_ID = "${AZURE_CREDENTIALS_USR}"
+                ARM_CLIENT_SECRET = "${AZURE_CREDENTIALS_PSW}"
+                ARM_ENVIRONMENT = "public"
+                TF_VAR_machine_count = "2"
+            }
+            when {
+                environment name: 'CONTINUE', value: 'yes'
+            }
+            steps {
+                ansiColor('xterm') {
+                    dir('terraform') {
+                        sh '${TERRAFORM_HOME}/terraform apply -auto-approve plan.out'
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Clean up'
+            deleteDir()
         }
     }
 }
