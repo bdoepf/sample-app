@@ -31,13 +31,13 @@ data "azurerm_image" "image" {
   resource_group_name = "${data.azurerm_resource_group.image.name}"
 }
 
-resource "azurerm_public_ip" "public_ip" {
-  count = "${var.machine_count}"
-  name = "sample_app_vm_public_ip-${count.index}"
-  location = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.sample_app.name}"
-  public_ip_address_allocation = "static"
-}
+//resource "azurerm_public_ip" "public_ip" {
+//  count = "${var.machine_count}"
+//  name = "sample_app_vm_public_ip-${count.index}"
+//  location = "${var.location}"
+//  resource_group_name = "${azurerm_resource_group.sample_app.name}"
+//  public_ip_address_allocation = "static"
+//}
 
 resource "azurerm_network_interface" "sample_app" {
   count = "${var.machine_count}"
@@ -46,14 +46,23 @@ resource "azurerm_network_interface" "sample_app" {
   resource_group_name = "${azurerm_resource_group.sample_app.name}"
 
   ip_configuration {
-    name = "testconfiguration1"
+    name = "ip_config-${count.index}"
     subnet_id = "${azurerm_subnet.sample_app.id}"
-    public_ip_address_id = "${azurerm_public_ip.public_ip.*.id[count.index]}"
     private_ip_address_allocation = "dynamic"
+    load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.sample_app.id}"]
   }
 }
 
-resource "azurerm_virtual_machine" "test" {
+resource "azurerm_availability_set" "sample_app" {
+  name                = "sample-app-as"
+  location            = "${azurerm_resource_group.sample_app.location}"
+  resource_group_name = "${azurerm_resource_group.sample_app.name}"
+  managed = true
+  platform_update_domain_count = "${var.machine_count}"
+  platform_fault_domain_count = "${var.machine_count}"
+}
+
+resource "azurerm_virtual_machine" "sample_app_machine" {
   count = "${var.machine_count}"
   name = "bdoepfne-vm-${count.index}"
   location = "${var.location}"
@@ -61,7 +70,7 @@ resource "azurerm_virtual_machine" "test" {
   network_interface_ids = [
     "${azurerm_network_interface.sample_app.*.id[count.index]}"]
   vm_size = "Standard_A0"
-
+  availability_set_id = "${azurerm_availability_set.sample_app.id}"
   delete_os_disk_on_termination = true
 
 
@@ -70,7 +79,7 @@ resource "azurerm_virtual_machine" "test" {
   }
 
   storage_os_disk {
-    name = "osdisk"
+    name = "osdisk-${count.index}"
     caching = "ReadWrite"
     create_option = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -78,7 +87,7 @@ resource "azurerm_virtual_machine" "test" {
 
 
   os_profile {
-    computer_name = "hostname"
+    computer_name = "sample-app-${count.index}"
     admin_username = "jambitadmin"
     admin_password = "jambit1!2"
   }
@@ -87,4 +96,13 @@ resource "azurerm_virtual_machine" "test" {
     disable_password_authentication = false
   }
 
+}
+
+output "sample_app_ip_address" {
+  value = "${azurerm_public_ip.lb.ip_address}"
+}
+
+
+output "sample_app_fqdn" {
+  value = "${azurerm_public_ip.lb.fqdn}"
 }
