@@ -49,7 +49,7 @@ pipeline {
         }
         stage('terraform apply') {
             environment {
-                TERRAFORM_HOME = tool name: 'terraform-0.11.3', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+                TERRAFORM_HOME = tool name: 'terraform-0.11.3', type: 'org.jenkinsci.plugins.terraform.TerraformInstallation'
                 ARM_SUBSCRIPTION_ID = "${AZURE_SUBSCRIPTION_ID}"
                 ARM_TENANT_ID = "${AZURE_TENANT_ID}"
                 ARM_CLIENT_ID = "${AZURE_CREDENTIALS_USR}"
