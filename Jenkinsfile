@@ -55,6 +55,7 @@ pipeline {
                 ARM_CLIENT_ID = "${AZURE_CREDENTIALS_USR}"
                 ARM_CLIENT_SECRET = "${AZURE_CREDENTIALS_PSW}"
                 ARM_ENVIRONMENT="public"
+                TF_VAR_machine_count="2"
             }
             steps {
                 ansiColor('xterm') {

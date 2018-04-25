@@ -15,3 +15,8 @@ variable "location" {
   type = "string"
   default = "westeurope"
 }
+
+variable "machine_count" {
+  default = 1
+  description = "Number of machines behind a load balancer"
+}
